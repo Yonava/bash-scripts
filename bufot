@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Check if the file extension is provided as the first parameter
+if [ -z "$1" ]; then
+    read -p "Enter the file extension to search for: " extension
+else
+    extension="$1"
+fi
+
+# Check if the backup directory is provided as the second parameter
+if [ -z "$2" ]; then
+    read -rp "Enter the directory to copy the found files into: " -r backup_dir
+else
+    backup_dir="$2"
+fi
+
+# Check if the backup directory exists, create it if it doesn't
+if [ ! -d "$backup_dir" ]; then
+    mkdir -p "$backup_dir"
+fi
+
+# Set the log file names
+backup_log_file="$backup_dir/backup.log"
+error_log_file="$backup_dir/errors.log"
+
+# Check if the log files exist, create them if they don't
+if [ ! -f "$backup_log_file" ]; then
+    touch "$backup_log_file"
+fi
+
+if [ ! -f "$error_log_file" ]; then
+    touch "$error_log_file"
+fi
+
+# Search the entire file system for files with the specified extension
+while IFS= read -r -d '' file; do
+    # Copy the found files into the backup directory
+    cp --preserve=all "$file" "$backup_dir"
+
+    # Get the current date and time
+    date_time=$(date +"%Y-%m-%d::%T")
+
+    # Write the date and time, and the name of the backed up file, to the backup log
+    echo "$date_time::$file" >> "$backup_log_file"
+done < <(find / -type f -name "*.$extension" -print0)
+
+# Check for any errors and write them to the error log
+if [ $? -ne 0 ]; then
+    echo "$(date +"%Y-%m-%d::%T")::Error occurred during backup" >> "$error_log_file" >&2
+fi
