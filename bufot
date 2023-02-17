@@ -33,7 +33,9 @@ if [ ! -f "$error_log_file" ]; then
 fi
 
 # Search the entire file system for files with the specified extension
-while IFS= read -r -d '' file; do
+mapfile -d '' files < <(find / -type f -name "*.$extension" -print0)
+IFS=$'\n'
+for file in "${files[@]}"; do
     # Copy the found files into the backup directory
     cp --preserve=all "$file" "$backup_dir"
 
@@ -42,7 +44,7 @@ while IFS= read -r -d '' file; do
 
     # Write the date and time, and the name of the backed up file, to the backup log
     echo "$date_time::$file" >> "$backup_log_file"
-done < <(find / -type f -name "*.$extension" -print0)
+done
 
 # Check for any errors and write them to the error log
 if [ $? -ne 0 ]; then
