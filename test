@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# echo test 5 times in errors.log
+
+for i in {1..5}; do
+    echo "test$i" > errors$i.log
+done

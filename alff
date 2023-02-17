@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Default values for options
+logfile="/var/log/apache2/access.log"
+outfile=""
+error_codes="4xx 5xx"
+
+# Parse options
+while getopts "f:o:" opt; do
+  case $opt in
+    f)
+      logfile="$OPTARG"
+      ;;
+    o)
+      outfile="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Find lines with error codes in the log file
+errors=$(grep -E "^.* (?:${error_codes}) [^ ]+ \[[^]]+\] \".*\"" "$logfile" | awk '{print $9, $1, substr($4,2), $7}' | sort -n)
+
+# Print errors to standard output or write to output file if specified
+if [ -n "$outfile" ]; then
+  echo "$errors" > "$outfile"
+else
+  echo "$errors"
+fi
