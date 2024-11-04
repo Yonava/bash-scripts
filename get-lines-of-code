@@ -1,1 +1,1 @@
-find . \( -name '*.ts' -o -name '*.vue' -o -name '*.js' -o -name '*.json' \) -not -path '*/node_modules/*' -not -name 'package-lock.json' | xargs wc -l
+find . \( -name '*.ts' -o -name '*.vue' -o -name '*.js' -o -name '*.json' \) -not -path '*/node_modules/*' -not -path '*/dist/*' -not -name 'package-lock.json' | xargs wc -l
